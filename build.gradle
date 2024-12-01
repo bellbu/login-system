@@ -34,7 +34,7 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-task copyPrivate(type: Copy) { // git 서브모듈 데이터 복사
+task copyPrivate(type: Copy) {
     copy {
         from './submodule-data/login-system'
         include "*.yml"
