@@ -34,6 +34,14 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+task copyPrivate(type: Copy) { // git 서브모듈 데이터 복사
+    copy {
+        from './submodule-data/login-system'
+        include "*.yml"
+        into 'src/main/resources'
+    }
+}
+
 def frontendDir = "$projectDir/src/main/frontend"  // React 프로젝트의 경로 설정
 
 sourceSets { // Spring Boot 리소스 설정
