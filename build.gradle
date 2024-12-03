@@ -18,23 +18,32 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    implementation 'org.projectlombok:lombok'
+    implementation 'org.springframework.boot:spring-boot-starter-web' // tomcat 내장 및 웹 요청 처리
+    implementation 'org.springframework.boot:spring-boot-starter-security' // 스프링 시큐리티
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // jpa
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis' // 레디스 추가
+    implementation 'org.projectlombok:lombok' // 롬복 추가
     annotationProcessor 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools' // 기능: 자동 재시작, LiveReload 지원
     runtimeOnly 'com.mysql:mysql-connector-j'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // spring-boot-configuration-processor
+    implementation 'org.springframework.boot:spring-boot-configuration-processor' // application.yml에 정의된 설정을 코드에서 처리할 수 있도록 지원
+
+    // jwt
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.3' // jwt 생성, 서명, 파싱 등을 위한 API
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3' // jwt api 구현체.
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3' // jwt를 json으로 직렬화/역직렬화
 }
 
 tasks.named('test') {
     useJUnitPlatform()
 }
 
-task copyPrivate(type: Copy) {
+// 빌드 시 application.yml 파일 서브모듈에서 가져오기(민감정보를 git private 리포지토리에서 가져옴)
+task copyPrivate(type: Copy) { 
     copy {
         from './submodule-data/login-system'
         include "*.yml"
@@ -42,6 +51,7 @@ task copyPrivate(type: Copy) {
     }
 }
 
+// React 빌드 설정
 def frontendDir = "$projectDir/src/main/frontend"  // React 프로젝트의 경로 설정
 
 sourceSets { // Spring Boot 리소스 설정
