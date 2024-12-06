@@ -1,37 +1,34 @@
-package com.example.loginsystem.controller;
+package com.example.loginsystem.controller.user;
 
 import com.example.loginsystem.constants.SecurityConstants;
-import com.example.loginsystem.domain.AuthenticationRequest;
+import com.example.loginsystem.domain.user.Admin;
 import com.example.loginsystem.prop.JwtProp;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.ObjectStreamClass;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 @Slf4j // log 객체를 자동 생성
+@RequiredArgsConstructor // 필드 주입을 생성자 주입으로 자동 설정
 @RestController
 public class LoginController { // JWT 토큰 생성 RestController
-
-    @Autowired // 의존성 주입
-    private JwtProp jwtProp; // JWT 관련 설정 클래스
+    
+    private final JwtProp jwtProp; // JWT 관련 설정 클래스
 
     // 토큰 생성
     @PostMapping("login")
-    public ResponseEntity<?> login(@RequestBody AuthenticationRequest request) { 
+    public ResponseEntity<?> login(@RequestBody Admin request) {
 
-        String username = request.getUsername();
+        String username = request.getEmail();
         String password = request.getPassword();
 
         log.info("username : " + username);
@@ -47,10 +44,10 @@ public class LoginController { // JWT 토큰 생성 RestController
 
         // JWT 생성
         String jwt = Jwts.builder() // JWT를 생성하는 빌더 객체 생성
-                        .signWith( Keys.hmacShaKeyFor(signinKey) , Jwts.SIG.HS512 ) // 시그니처에 사용할 비밀키, 알고리즘 설정
+                        .signWith(Keys.hmacShaKeyFor(signinKey) , Jwts.SIG.HS512) // 시그니처에 사용할 비밀키, 알고리즘 설정
                         .header() // JWT 헤더 설정
                 .add("typ", SecurityConstants.TOKEN_TYPE).and() // type: JWT
-                .expiration(new Date( System.currentTimeMillis() + 1000*60*60*24*5 )) // 토큰 만료 시간: 5일 설정
+                .expiration(new Date(System.currentTimeMillis() + 1000*60*60*24*5)) // 토큰 만료 시간: 5일 설정
                 .claim("uid", username) // 사용자 이름을 클레임(페이로드의 한 조각)에 추가
                 .claim("rol", roles) // 권한 정보를 클레임(페이로드의 한 조각)에 추가
                 .compact(); // 최종적으로 토큰 생성
@@ -73,7 +70,7 @@ public class LoginController { // JWT 토큰 생성 RestController
 
         // JWT 검증 및 파싱
         Jws<Claims> parsedToken = Jwts.parser() // JwtParser 객체 생성
-                                    .setSigningKey( Keys.hmacShaKeyFor(signingKey) ) // 비밀키 설정
+                                    .setSigningKey(Keys.hmacShaKeyFor(signingKey)) // 비밀키 설정
                                     .build() // 설정을 적용하여 JwtParser 완성
                                     .parseClaimsJws(jwt); // jwt를 파싱하여 유효성 검증하고 페이로드를 읽음
 
