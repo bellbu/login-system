@@ -23,13 +23,13 @@ public class AdminCreateRequest {
     private Boolean emailVerified; // 이메일 검증 여부
 
     public Admin toEntity(PasswordEncoder passwordEncoder){
-        return Admin.builder()
-                .email(email)
+        return Admin.builder() // 빌더 패턴 사용해 객체 생성
+                .email(email) // DTO email 값을 엔티티의 email 필드에 할당
                 .name(name)
                 .password(passwordEncoder.encode(password))
                 .authority(Authority.ROLE_ADMIN)
                 .emailVerified(emailVerified)
-                .build();
+                .build(); // 객체 생성 완료
     }
 
 }
