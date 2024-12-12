@@ -1,4 +1,4 @@
-package com.example.loginsystem.domain.user;
+package com.example.loginsystem.domain.admin;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

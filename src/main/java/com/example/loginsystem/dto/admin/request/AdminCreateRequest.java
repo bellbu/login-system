@@ -1,11 +1,13 @@
-package com.example.loginsystem.dto.user.request;
+package com.example.loginsystem.dto.admin.request;
 
-import com.example.loginsystem.domain.user.Admin;
-import com.example.loginsystem.domain.user.Authority;
+import com.example.loginsystem.domain.admin.Admin;
+import com.example.loginsystem.domain.admin.Authority;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Collections;
 
 @Getter
 public class AdminCreateRequest {
@@ -27,7 +29,7 @@ public class AdminCreateRequest {
                 .email(email) // DTO email 값을 엔티티의 email 필드에 할당
                 .name(name)
                 .password(passwordEncoder.encode(password))
-                .authority(Authority.ROLE_ADMIN)
+                .authorities(Collections.singletonList(Authority.ROLE_ADMIN))
                 .emailVerified(emailVerified)
                 .build(); // 객체 생성 완료
     }
