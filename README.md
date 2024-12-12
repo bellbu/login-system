@@ -50,12 +50,14 @@
 ### 2-1. **`CustomAdmin`이 필요한 이유**
 
 - Spring Security가 사용자 인증 및 권한 관리를 수행하는 데 필요한 **사용자 세부 정보**를 담고 있음  
-- **역할**: Spring Security의 요구사항(UserDetails)과 Admin 엔티티를 연결하는 중간 객체  
+- **역할**: Spring Security의 요구사항(UserDetails)과 Admin 엔티티를 연결하는 중간 객체
+
+<br/>
 
 ### 2-2. **`CustomAdmin`의 주요 기능**
 
 - **`UserDetails` 인터페이스 구현**:
-  - **사용자 정보 제공**:  
-    Spring Security는 인증된 사용자 정보를 `UserDetails` 객체로 관리하며 `SecurityContext`에 저장  
-  - **권한 정보 제공**:  
-    사용자 권한(Role)을 Spring Security에 제공하여 접근 제어 수행  
+  1. **사용자 정보 제공**:
+      - Spring Security는 인증된 사용자 정보를 `UserDetails` 객체로 관리하며 `SecurityContext`에 저장
+  2. **권한 정보 제공:**
+      - 사용자 권한(Role)을 Spring Security에 제공하여 접근 제어 수행
