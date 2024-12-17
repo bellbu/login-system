@@ -24,12 +24,12 @@ import java.util.stream.Collectors;
 * UsernamePasswordAuthenticationFilter: 사용자 인증 요청(/login)을 처리
 *
 * client -> JwtAuthenticationFilter("/login") -> server
-*                                       ↳ email, password로 인증 시도: attemptAuthentication 메소드 실행
+*                                       ↳ email, password로 사용자 인증: attemptAuthentication 메소드 실행
 *                                       ↳ 인증 성공 시 successfulAuthentication 메소드 호출 -> JWT 생성 -> response > header > authrization에 JWT 담음
 *                                       ↳ 인증 실패 시 response > status에 401 담음 (UNAUTHORIZED)
 */
 @Slf4j
-public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter { 
     
     private final AuthenticationManager authenticationManager; // 스프링 시큐리티 인증 관리자
     private final JwtTokenProvider jwtTokenProvider; // JWT 토큰 생성, 파싱, 유효성 검사 등을 담당하는 유틸 클래스.
@@ -44,20 +44,24 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
 
     /**
-     * attemptAuthentication: 인증 시도
+     * UsernamePasswordAuthenticationFilter 상속된 JwtAuthenticationFilter의 doFilter() 메소드가 URL 확인 후 일치하면 attemptAuthentication() 메소드 호출
+     * attemptAuthentication: 사용자 인증 시도
      * */
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
-        log.info("username : " + email);
+        log.info("email : " + email);
         log.info("password : " + password);
 
         // 이메일과 비밀번호로 사용자 인증 객체 생성
         Authentication authentication = new UsernamePasswordAuthenticationToken(email, password);
 
-        // 사용자 인증 시도: 성공 시 - Authentication 객체 반환 / 실패 시 - 예외 던짐
+        /**
+         * authenticationManager.authenticate()가 CustomAdminDetailService의 loadUserByUsername 메서드를 호출하여 데이터베이스에서 사용자 조회
+         * 사용자 인증 시도: 성공 시 - Authentication 객체 반환 / 실패 시 - 예외 던짐
+         */
         authentication = authenticationManager.authenticate(authentication);
 
         log.info("인증 여부 : " + authentication.isAuthenticated());
@@ -72,7 +76,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     }
 
     /**
-     * 인증 성공
+     * 사용자 인증 성공 시
      * - JWT를 생성
      * - JWT를 응답 헤더에 설정
      */
@@ -87,8 +91,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         // 권한 정보
         List<String> authorities = admin.getAdmin().getAuthorities().stream()
-                                .map(Enum::name)
-                                .collect(Collectors.toList());
+                                .map(Enum::name) // 열거형(enum) 데이터를 문자열(String)로 변환: .map(authority -> authority.name()): Enum의 name() 메서드 호출 ex) Authority.ADMIN.name(); - "ADMIN" 반환
+                                .collect(Collectors.toList()); // 스트림에서 변환된 결과를 List<String> 형태로 수집
 
         // JwtTokenProvider를 사용해 사용자 정보를 포함한 JWT를 생성
         String jwt = jwtTokenProvider.createToken(adminNo, email, authorities);

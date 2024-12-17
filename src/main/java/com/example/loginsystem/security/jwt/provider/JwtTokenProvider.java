@@ -57,23 +57,20 @@ public class JwtTokenProvider {
     }
 
     /**
-     * 토큰 해석
-     * UsernamePasswordAuthenticationToken: 인증된 사용자 정보와 권한을 담은 객체
+     * 토큰 해석하여 인증 객체 생성
+     * UsernamePasswordAuthenticationToken: 인증된 사용자 정보와 권한을 담은 인증 객체
      */
-    public UsernamePasswordAuthenticationToken getAuthentication(String authHeader) { // authHeader: Authorization 헤더에서 전달된 토큰 문자열(Bearer + {토큰})
+    public UsernamePasswordAuthenticationToken getAuthentication(String jwt) { // authHeader: Authorization 헤더에서 전달된 토큰 문자열(Bearer + {토큰})
 
-        if(authHeader == null || authHeader.isEmpty())
+        if(jwt == null || jwt.isEmpty())
             return null;
 
         try {
-            // JWT 추출 (Bearer + {jwt}) ➡ {jwt}
-            String jwt = authHeader.replace(JwtConstants.TOKEN_PREFIX, "");
-
             // JWT 파싱(해석): Jwts.parser를 사용해 토큰을 해석하고 페이로드를 읽어옴
-            Jws<Claims> parsedToken = Jwts.parser()
-                                        .verifyWith(getShaKey())
-                                        .build()
-                                        .parseSignedClaims(jwt);
+            Jws<Claims> parsedToken = Jwts.parser() // 파싱 객체를 생성: JWT를 파싱하거나 서명(signature)을 검증
+                                        .verifyWith(getShaKey()) // 서명(signature)을 검증하기 위해 비밀 키를 설정
+                                        .build() // JWT 파서를 완성
+                                        .parseSignedClaims(jwt); // JWT를 파싱하고 검증을 수행
 
             log.info("parsedToken : " + parsedToken);
 
@@ -83,8 +80,8 @@ public class JwtTokenProvider {
 
             // 인증된 사용자 권한(다중 권한인 경우)
             List<String> roles = parsedToken.getBody().get("authorities", List.class);
-            List<GrantedAuthority> authorities = roles.stream()
-                                                    .map(SimpleGrantedAuthority::new)
+            List<GrantedAuthority> authorities = roles.stream() // 스프링 시큐리티의 권한 관리를 위해 GrantedAuthority 인터페이스 타입 필요
+                                                    .map(SimpleGrantedAuthority::new) // = map(role -> new SimpleGrantedAuthority(role)), SimpleGrantedAuthority: GrantedAuthority의 구현체
                                                     .collect(Collectors.toList());
             log.info("authorities : {}", authorities);
 
@@ -98,7 +95,7 @@ public class JwtTokenProvider {
 
             // 권한 업데이트
             List<Authority> adminAuthorities = roles.stream()
-                                                    .map(Authority::valueOf)
+                                                    .map(Authority::valueOf) // 문자열(String) 데이터를 열거형(enum) 상수로 변환: .map(role -> Authority.valueOf(role)) ex) Authority.valueOf("ADMIN") - Authority.ADMIN 반환
                                                     .collect(Collectors.toList());
             admin.setAuthorities(adminAuthorities);
 
@@ -106,16 +103,16 @@ public class JwtTokenProvider {
             CustomAdmin userDetails = new CustomAdmin(admin);
             log.info("providerUserDetails : " + userDetails);
 
-            return new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+            return new UsernamePasswordAuthenticationToken(userDetails, null, authorities); // 인증된 사용자(userDetails)와 해당 사용자의 권한들(authorities)을 스프링 시큐리티의 인증 객체로 생성하여 리턴
 
         } catch (ExpiredJwtException exception) {
-            log.warn("Request to parse expired JWT : {} failed : {}", authHeader, exception.getMessage());
+            log.warn("Request to parse expired JWT : {} failed : {}", jwt, exception.getMessage());
         } catch (UnsupportedJwtException exception) {
-            log.warn("Request to parse unsupported JWT : {} failed : {}", authHeader, exception.getMessage());
+            log.warn("Request to parse unsupported JWT : {} failed : {}", jwt, exception.getMessage());
         } catch (MalformedJwtException exception) {
-            log.warn("Request to parse invalid JWT : {} failed : {}", authHeader, exception.getMessage());
+            log.warn("Request to parse invalid JWT : {} failed : {}", jwt, exception.getMessage());
         } catch (IllegalArgumentException exception) {
-            log.warn("Request to parse empty or null JWT : {} failed : {}", authHeader, exception.getMessage());
+            log.warn("Request to parse empty or null JWT : {} failed : {}", jwt, exception.getMessage());
         }
 
         return null;
@@ -129,19 +126,22 @@ public class JwtTokenProvider {
         try {
             // JWT 파싱(해석)
             Jws<Claims> parsedToken = Jwts.parser()
-                                            .verifyWith(getShaKey())
-                                            .build()
-                                            .parseSignedClaims(jwt);
+                                        .verifyWith(getShaKey())
+                                        .build()
+                                        .parseSignedClaims(jwt);
 
             log.info("##### 토큰 만료 기간 #####");
             log.info("-> " + parsedToken.getPayload().getExpiration());
 
             Date exp = parsedToken.getPayload().getExpiration(); // 만료 시간
 
-            // 만료시간(exp)과 현재시간(new Date()) 비교
-            // 2023.12.01 vs 2023.12.14  --> 만료 --->  false
-            // 2023.12.30 vs 2023.12.14  --> 유효 --->  true
-            return !exp.before(new Date());
+            //
+            /**
+             * exp.before(new Date())
+             *  - true: 만료 시간(exp)이 현재 시간(new Date())보다 이전임 → 토큰이 만료됨.
+             *  - false: 만료 시간(exp)이 현재 시간(new Date()) 이후임 → 토큰이 유효함.
+             * */
+            return !exp.before(new Date()); // exp가 new Date()보다 이후여야 true 리턴
 
         } catch (ExpiredJwtException exception) {
             log.error("Token Expired");                 // 토큰 만료
@@ -166,20 +166,6 @@ public class JwtTokenProvider {
     // 바이트 배열로 변환한 비밀키를 HMAC-SHA 알고리즘에 적합한 SecretKey로 반환
     private SecretKey getShaKey() {
         return Keys.hmacShaKeyFor(getSigningKey());
-    }
-
-    // DB에 조회한 Admin 객체를 스프링 시큐리티의 UserDetails 객체로 변환
-    private UserDetails createUserDetails(Admin admin) {
-        // 다중 권한 처리
-        List<GrantedAuthority> grantedAuthorities = admin.getAuthorities().stream()
-                                                        .map(authority -> new SimpleGrantedAuthority(authority.name()))
-                                                        .collect(Collectors.toList());
-
-        return new User(  // User 객체: 스프링 시큐리티에서 제공하는 UserDetails의 구현체
-                String.valueOf(admin.getEmail()),
-                admin.getPassword(),
-                grantedAuthorities
-        );
     }
 
 }
