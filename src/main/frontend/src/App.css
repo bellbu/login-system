@@ -1,6 +1,6 @@
-.App {
-  margin: 0 auto;
-  margin-top: 200px;
-  text-align: center;
-  width: 400px;
+.container {
+  width: 960px;
+  margin: 50px auto;
 }
+
+hr { margin-bottom: 50px; }
