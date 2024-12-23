@@ -1,9 +1,22 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import './LoginForm.css'
+import { LoginContext } from '../../../context/LoginContextProvider'
 
 const LoginForm = () => {
 
-    const onLogin = () => {
+    const {login} = useContext(LoginContext);
+
+    const onLogin = (e) => {
+        e.preventDefault();
+
+        const form = e.target;
+        const email = form.email.value;
+        const password = form.password.value;
+
+        // 데이터 세팅
+        
+        // 로그인 호출
+        login(email, password);
 
     }
 
@@ -11,7 +24,7 @@ const LoginForm = () => {
         <div className="form">
             <h2 className='login-title'>로그인</h2>
 
-            <form className="login-form" onSubmit={(e) => onLogin}>
+            <form className="login-form" onSubmit={(e) => onLogin(e)}>
                 <div>
                     <label htmlFor="email">이메일</label>
                     <input type="text" 

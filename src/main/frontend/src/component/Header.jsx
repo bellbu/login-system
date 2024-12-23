@@ -10,7 +10,7 @@ const Header = () => {
 
     // isLogin  : 로그인 여부 - Y(true), N(false)
     // logout() : 로그아웃 함수 - setLogin(false)
-    const {isLogin, logout} = useContext(LoginContext);
+    const {isLogin, login, logout} = useContext(LoginContext);
     
     return (
         <header>
