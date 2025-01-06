@@ -8,28 +8,26 @@ export const LoginContext = createContext(); // 새로운 Context 생성하여 �
                                              // LoginContext.Provider를 통해 값을 전달, 자식 컴포넌트에서 useContext(LoginContext)를 사용해 값을 가져옴
 LoginContext.displayName = 'LoginContextName' // displayName: 컨텍스트를 디버깅할 때 표시되는 이름 지정(기본적으로 Context로 표시)
 
-/**       
+/**
+ * 로그인 상태(isLogin)를 관리하고, 관련된 로직(로그인, 로그아웃, 로그인 체크)을 제공하는 컨텍스트 제공자
  * 로그인 상태(isLogin)와 로그아웃 함수(logout)를 제공하는 컨텍스트 제공자 
- * - 로그인 체크
+ * - 로그인 상태 체크(로그인 세팅, 로그아웃 세팅)
  * - 로그인
- * - 로그 아웃
- * 
- * 로그인 세팅
- * 로그아웃 세팅
+ * - 로그아웃
  */
 const LoginContextProvider = ({children}) => {
     
     /**
      * 상태
-     * - 로그인 여부 
-     * - 유저 정보
+     * - 로그인 상태(여부)
+     * - 관리자 정보
      * - 권한 정보
-     * - 아이디 저장 여부(쿠키)
+     * - 이메일 저장 여부(쿠키)
      */
 
     /*----------------------------[State]--------------------------- */
-    // 로그인 여부
-    const [isLogin, setLogin] = useState(false); // 초기 로그아웃 상태(false)
+    // 로그인 상태(여부)
+    const [isLogin, setLogin] = useState(false); // 초기값 로그아웃 상태(false)
 
     // 관리자 정보
     const [adminInfo, setAdminInfo] = useState({});
@@ -45,12 +43,12 @@ const LoginContextProvider = ({children}) => {
     const navigate = useNavigate()
 
     /**
-     * 로그인 체크
+     * 로그인 상태(여부) 체크
      * - 쿠키에 jwt가 있는지 확인
      * - jwt로 사용자 정보를 요청
      * - 
      */
-    const loginCheck = async () => {
+    const loginCheck = async () => { // async (): 비동기 코드 실행
 
         // 쿠키에서 jwt 토큰 가져오기
         const accessToken = Cookies.get("accessToken");
@@ -66,10 +64,16 @@ const LoginContextProvider = ({children}) => {
             return;
         }
 
-        // accessToken (jwt)이 있는 경우 header에 jwt 담기
-         api.defaults.headers.common.Authorization = `Bearer ${accessToken}`
 
-        // 사용자 정보 요청청
+       /**
+        *  accessToken(jwt)이 있는 경우 헤더에 jwt 담기
+        * - axios 헤더 추가: api 요청 시 인증을 위함
+        *   1) api.defaults.headers.common: axios 모든 요청 api에 공통으로 사용할 헤더 설정
+        *   2) Authorization: Authorization 헤더 추가
+        */
+        api.defaults.headers.common.Authorization = `Bearer ${accessToken}`
+
+        // 사용자 정보 요청
         let response
         let data
         try {
@@ -90,9 +94,9 @@ const LoginContextProvider = ({children}) => {
         }
 
         // 인증 성공
-        console.log(`accessToken (jwt) 토큰으로 사용자 인증정보 요청 성공!`)
+        console.log(`accessToken(jwt) 토큰으로 사용자 인증정보 요청 성공!`)
 
-        // 로그인 세팅
+        // 로그인 상태 셋팅, 업데이트
         loginSetting(data, accessToken);
 
     }
@@ -152,8 +156,10 @@ const LoginContextProvider = ({children}) => {
     // 로그인 세팅
     // adminData(관리자 정보), accessToken(jwt)
     const loginSetting = (adminData, accessToken) => {
-        
+
+        // 객체 구조 분해 할당
         const {id, email, authorities} = adminData;
+
         // 필요없음
         // const roleList = authorities.map((auth) => auth.authorities);
         
@@ -164,7 +170,7 @@ const LoginContextProvider = ({children}) => {
         // 필요없음
         // console.log(`roleList : ${roleList}`);
         
-        // axios 객체의 header - Authorization : `Bearer ${accessToken}`
+        // axios 헤더 추가 - Authorization : `Bearer ${accessToken}`
         api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
         
         // 로그인 여부 true 세팅
@@ -176,7 +182,6 @@ const LoginContextProvider = ({children}) => {
 
         // 권한 정보 세팅
         const updatedAuthorities = {isUser : false, isAdmin : false};
-        
         authorities.forEach((role) => {
             if(role == 'ROLE_USER') updatedAuthorities.isUser = true;
             if(role == 'ROLE_ADMIN') updatedAuthorities.isAdmin = true;
@@ -212,9 +217,9 @@ const LoginContextProvider = ({children}) => {
     }, [])
 
     return (
-        // LoginContext.Provider를 사용해 value 속성 값을 Context에 전달
+        // LoginContext.Provider를 사용해 데이터와 함수를 Context에 전달
         // LoginContextProvider의 자식 컴포넌트들이 Context 값을 사용할 수 있음
-        <LoginContext.Provider value={ {isLogin, adminInfo, authorities, login, logout} }> 
+        <LoginContext.Provider value={ {isLogin, adminInfo, authorities, login, logout} }>
             {children}  
         </LoginContext.Provider>
     )

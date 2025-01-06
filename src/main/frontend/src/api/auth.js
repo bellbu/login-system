@@ -1,6 +1,6 @@
 import api from './api';
 
-// 로그인
+// 로그인: '/login' 요청을 JwtAuthenticationFilter가 가로챔
 export const login = (email, password) => api.post(`/login?email=${email}&password=${password}`)
 
 // 사용자 정보

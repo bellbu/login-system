@@ -1,14 +1,25 @@
 import React from 'react'
 
-const JoinForm = () => {
-  const onJoin = () => {
+const JoinForm = ({ join }) => {
+
+  const onJoin = (e) => {
+      e.preventDefault(); // submit 기본 동작 방지
+      const form = e.target;
+      const email = form.email.value;
+      const name = form.name.value;
+      const password = form.password.value;
+
+      console.log(email, name, password);
+
+      join( {email, name, password} ); // Join 컴포넌트의 join 함수를 호출하여 회원가입 처리
 
   }
+
   return (
     <div className="form">
       <h2 className='login-title'>회원가입</h2>
 
-      <form className="login-form" onSubmit={(e) => onJoin}>
+      <form className="login-form" onSubmit={(e) => onJoin(e)}>
           <div>
               <label htmlFor="email">이메일</label>
               <input type="text" 
@@ -21,12 +32,12 @@ const JoinForm = () => {
           </div>
 
           <div>
-            <label htmlFor="Name">이름</label>
+            <label htmlFor="name">이름</label>
                 <input type="text" 
-                      id='Name' 
+                      id='name'
                       placeholder='이름 입력' 
-                      name='Name' 
-                      autoComplete='Name' 
+                      name='name'
+                      autoComplete='name'
                       required 
                 />
             </div>
