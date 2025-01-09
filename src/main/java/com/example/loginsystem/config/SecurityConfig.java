@@ -33,6 +33,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        log.info("시큐리티 설정...");
+
         // 폼 기반 로그인 비활성화: RESTful API에서는 JWT 등 Stateless 인증 방식을 사용하며 폼 로그인은 불필요
         http.formLogin((login) -> login.disable());
 
@@ -71,6 +73,8 @@ public class SecurityConfig {
     }
 
     // AuthenticationManager 빈 등록
+    private AuthenticationManager authenticationManager;
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();

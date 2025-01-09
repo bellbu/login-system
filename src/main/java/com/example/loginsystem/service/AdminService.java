@@ -23,7 +23,7 @@ public class AdminService {
     public int saveAdmin(AdminCreateRequest request) {
         // 유효성 검사
         if (adminRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("이미 가입되어 있는 유저입니다.");
+            throw new RuntimeException("이미 가입되어 있는 이메일입니다.");
         }
         if (Boolean.FALSE.equals(request.getEmailVerified())) {
             throw new RuntimeException("이메일 검증이 필요합니다.");

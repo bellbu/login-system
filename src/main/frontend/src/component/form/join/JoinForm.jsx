@@ -8,10 +8,11 @@ const JoinForm = ({ join }) => {
       const email = form.email.value;
       const name = form.name.value;
       const password = form.password.value;
+      const emailVerified = form.emailVerified.value;
 
-      console.log(email, name, password);
+      console.log(email, name, password, emailVerified);
 
-      join( {email, name, password} ); // Join 컴포넌트의 join 함수를 호출하여 회원가입 처리
+      join( {email, name, password, emailVerified} ); // Join 컴포넌트의 join 함수를 호출하여 회원가입 처리
 
   }
 
@@ -52,6 +53,12 @@ const JoinForm = ({ join }) => {
                     required       
               />
             </div>
+            {/* 이메일 인증여부 추후에 추가 */}
+            <input
+                type="hidden"
+                name="emailVerified"
+                value="true"
+            />
           <button type='submit' className='btn btn--form btn-login'>가입</button>
       </form>
 

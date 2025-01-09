@@ -213,7 +213,10 @@ const LoginContextProvider = ({children}) => {
 
     // useEffect를 사용해 3초 뒤에 로그인 상태로 변경
     useEffect( () => {
-     
+
+        // 로그인 체크
+        loginCheck();
+
     }, [])
 
     return (
