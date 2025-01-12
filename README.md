@@ -13,8 +13,8 @@
         → `email`과 `password`로 `UsernamePasswordAuthenticationToken` 객체 생성  
         → `AuthenticationManager`를 통해 인증(`authenticate`) 시도  
   2. **사용자 인증 (`CustomAdminDetailService`)**  
-      - `AuthenticationManager`가 `CustomAdminDetailService`의 `loadUserByUsername` 메서드를 호출하여 데이터베이스에서 사용자 조회  
-      - 사용자를 찾으면 인증된 사용자 객체(`CustomAdmin`) 반환  
+      - `AuthenticationManager`가 `CustomAdminDetailService`의 `loadUserByUsername` 메서드를 호출하여 데이터베이스에서 사용자 조회하여 계정 상태 확인 후 인증
+      - 인증 성공 시 사용자 객체(`CustomAdmin`) 반환  
   3. **인증 성공 (`successfulAuthentication`)**  
       - `JwtTokenProvider`를 사용해 JWT 토큰 생성  
       - 생성된 JWT를 응답 헤더(`Authorization`)에 포함하여 클라이언트에 반환  
