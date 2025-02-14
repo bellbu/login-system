@@ -2,7 +2,8 @@ import React, { createContext, useEffect, useState } from 'react';
 import api from '../api/api';
 import Cookies from 'js-cookie';
 import * as auth from '../api/auth';
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
+import * as Swal from '../api/alert';
 
 export const LoginContext = createContext(); // 새로운 Context 생성하여 로그인 상태(isLogin)와 로그아웃 함수(logout)를 전달 
                                              // LoginContext.Provider를 통해 값을 전달, 자식 컴포넌트에서 useContext(LoginContext)를 사용해 값을 가져옴
@@ -10,7 +11,6 @@ LoginContext.displayName = 'LoginContextName' // displayName: 컨텍스트를 �
 
 /**
  * 로그인 상태(isLogin)를 관리하고, 관련된 로직(로그인, 로그아웃, 로그인 체크)을 제공하는 컨텍스트 제공자
- * 로그인 상태(isLogin)와 로그아웃 함수(logout)를 제공하는 컨텍스트 제공자 
  * - 로그인 상태 체크(로그인 세팅, 로그아웃 세팅)
  * - 로그인
  * - 로그아웃
@@ -27,7 +27,7 @@ const LoginContextProvider = ({children}) => {
 
     /*----------------------------[State]--------------------------- */
     // 로그인 상태(여부)
-    const [isLogin, setLogin] = useState(false); // 초기값 로그아웃 상태(false)
+    const [isLogin, setLogin] = useState(null); // 초기값 로그아웃 상태(false)
 
     // 관리자 정보
     const [adminInfo, setAdminInfo] = useState({});
@@ -129,28 +129,40 @@ const LoginContextProvider = ({children}) => {
                 // 로그인 체크 (/users/{email} => userData)
                 loginCheck();
 
-                alert('로그인 성공');
+                Swal.alert('로그인 성공', `메인 화면으로 갑니다.`, "success", () =>{ navigate("/")});
 
                 navigate("/");
             }
         } catch (error) {
             // 로그인 실패
             // - 아이디 또는 비밀번호가 일치하지 않습니다.
-            alert('로그인 실패!');
+            Swal.alert('로그인 실패', "아이디 또는 비밀번호가 일치하지 않습니다.", "error");
         }
     
     }
 
     // 로그아웃
-    const logout = () => {
-        const check = window.confirm(`로그아웃하시겠습니까?`)
-        if(check){
+    const logout = (force = false) => {
+        if (force) {
             // 로그아웃 세팅
             logoutSetting();
 
             // 메인 페이지로 이동
             navigate("/");
+            return;
         }
+
+        // const check = window.confirm(`로그아웃하시겠습니까?`)
+        Swal.confirm("로그아웃하시겠습니다?", "로그아웃을 진행합니다.", "warning",
+            (result) => {
+                if( result.isConfirmed ) {
+                    // 로그아웃 세팅
+                    logoutSetting();
+
+                    // 메인 페이지로 이동
+                    navigate("/");
+                }
+            });
     }
 
     // 로그인 세팅
@@ -222,7 +234,7 @@ const LoginContextProvider = ({children}) => {
     return (
         // LoginContext.Provider를 사용해 데이터와 함수를 Context에 전달
         // LoginContextProvider의 자식 컴포넌트들이 Context 값을 사용할 수 있음
-        <LoginContext.Provider value={ {isLogin, adminInfo, authorities, login, logout} }>
+        <LoginContext.Provider value={ {isLogin, adminInfo, authorities, login, loginCheck, logout} }>
             {children}  
         </LoginContext.Provider>
     )

@@ -2,10 +2,10 @@ package com.example.loginsystem.domain.admin;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
 
 @Entity
 @Getter
@@ -59,8 +59,9 @@ public class Admin {
         this.emailVerified = emailVerified != null ? emailVerified : false;
     }
 
-    public void updateAdmin(String name, Boolean emailVerified) {
+    public void updateAdmin(String name, String password, Boolean emailVerified) {
         this.name = name;
+        this.password = password;
         this.emailVerified = emailVerified;
     }
 

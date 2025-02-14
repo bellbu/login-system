@@ -4,6 +4,8 @@ import LoginContextConsumer from '../../context/LoginContextConsumer'
 import JoinForm from '../../component/form/join/JoinForm'
 import * as auth from '../../api/auth'
 import { useNavigate } from 'react-router-dom'
+import * as Swal from '../../api/alert';
+
 
 const Join = () => {
 
@@ -31,11 +33,15 @@ const Join = () => {
 
     if(status === 200) {
         console.log(`회원가입 성공!`);
-        alert(`회원가입 성공!`);
+        Swal.alert(`회원가입 성공`, "메인 화면으로 이동합니다.", "success", () => { navigate("/login") });
+    /*
+       Swal.alert(`회원가입 성공!`);
         navigate("/login"); // 회원가입 성공 시 로그인 페이지 이동
+    */
+
     } else {
         console.log(`회원가입 실패!`);
-        alert(`회원가입에 실패하였습니다.`)
+        Swal.alert("회원가입 실패", "회원가입에 실패하였습니다.", "error");
     }
 
   }

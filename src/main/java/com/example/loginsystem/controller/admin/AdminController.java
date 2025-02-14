@@ -31,7 +31,7 @@ public class AdminController { // JWT 토큰 생성 RestController
     /**
      * 관리자 조회
      */
-    @Secured("ROLE_ADMIN") // ADMIN 권한 설정
+    @Secured({"ROLE_ADMIN", "ROLE_USER"}) // 해당 메서드에 접근할 수 있는 권한 설정
     @GetMapping("/info")
     public ResponseEntity<?> getAdmins(@AuthenticationPrincipal CustomAdmin customAdmin) {
         if (customAdmin == null) {
@@ -56,6 +56,7 @@ public class AdminController { // JWT 토큰 생성 RestController
      */
     @PostMapping("")
     public ResponseEntity<?> saveAdmin(@RequestBody AdminCreateRequest request) throws Exception {
+        System.out.println("테스트~~~~~~~");
         log.info("[POST] - /users");
         int result = adminService.saveAdmin(request);
 

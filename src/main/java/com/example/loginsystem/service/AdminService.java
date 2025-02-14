@@ -45,7 +45,10 @@ public class AdminService {
         Admin admin = adminRepository.findByEmail(request.getEmail()) // findById: id를 기준으로 1개의 데이터를 가져옴. Optional<User> 형태로 반환
                 .orElseThrow(IllegalArgumentException::new); // Optional의 orElseThrow: 데이터가 없는 경우(해당 id가 없는 경우) 예외를 던짐
 
-        admin.updateAdmin(request.getName(), request.getEmailVerified()); // 객체 이름 변경
+        // 비밀번호 암호화 적용
+        String encodePassword = passwordEncoder.encode(request.getPassword());
+
+        admin.updateAdmin(request.getName(), encodePassword, request.getEmailVerified()); // 객체 이름 변경
 
         return 1;
     }

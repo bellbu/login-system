@@ -6,6 +6,7 @@ import Login from './page/login/Login';
 import Admin from './page/login/Admin';
 import About from './page/login/About';
 import Home from './page/login/Home';
+import SuperAdmin from './page/login/SuperAdmin';
 import LoginContextProvider from './context/LoginContextProvider';
 
 // App.js: 애플리케이션의 메인 컴포넌트
@@ -23,6 +24,7 @@ const App = () => {
                     <Route path="/join" element={ <Join />}></Route>
                     <Route path="/admin" element={ <Admin />}></Route>
                     <Route path="/about" element={ <About />}></Route>
+                    <Route path="/superadmin" element={ <SuperAdmin />}></Route>
                 </Routes>
             </LoginContextProvider>
         </BrowserRouter>
